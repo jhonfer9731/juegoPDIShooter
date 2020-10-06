@@ -79,7 +79,7 @@ class Enemy(pygame.sprite.Sprite):
             self.surf = pygame.Surface(self.size) #Se genera la superficie que aparecera la pantalla
             self.surf.fill(RED)
             self.rect = self.surf.get_rect(center = (random.randint(40,SCREEN_WIDTH-40),0))# me da info de las coordenadas de surf
-    def set_speed(speed):
+    def set_speed(self,speed):
         """ Metodo que permite establecer la velocidad del enemigo"""
         self.speed = speed
   
