@@ -28,6 +28,7 @@ WHITE = (255, 255, 255)
 SCREEN_WIDTH = 720
 SCREEN_HEIGHT = 480
 SPEED = 5
+VIDAS_INCIALES = 50
  
 """Inicializacion de la pantalla del juego"""
 
@@ -40,10 +41,11 @@ img_background = pygame.image.load("img_bg.jpg")
 """Obejetos del juego """
  
 #Se crean los objetos jugador y enemigos       
-P1 = Player()
+P1 = Player(VIDAS_INCIALES)
 E1 = Enemy((10,10))
 bullet = Bullet(P1.get_pos()) # Se crea el objeto bala y se inicializa en la posicion actual del jugador
- 
+marcador = marcadorVidas(ancho = 200) # Inicializacion del marcador con el ancho de la barra en pixeles
+marcador.modificarMarcador(VIDAS_INCIALES,VIDAS_INCIALES) # Se asigna el valor maximo de vidas y el numero actual que al principio es el maximo tambien
 """Creacion de grupos"""
 
 bullets_group = pygame.sprite.Group() #Se crea el grupo donde estaran todas las balas activas
@@ -54,7 +56,6 @@ enemies.add(E1)#Al agregar un enemigo permite usar metodos de colision para sabe
 all_sprites = pygame.sprite.Group() #Se crea el grupo all_sprites para poder iterar en cada loop del juego sobre todos los elementos y poder dibujarlos
 all_sprites.add(P1) # Se agrega el jugador al grupo
 all_sprites.add(E1) # Se agrega el enemigo al grupo
-
 
 """Eventos"""
  
@@ -108,20 +109,26 @@ while True:
     for entity in all_sprites:
         DISPLAYSURF.blit(entity.surf, entity.rect) # dibujar en la superficie el objeto (entity.surf) con las coordenadas dadas por entity,.rect
         entity.move() # Mueve los elementos del juego
- 
+    DISPLAYSURF.blit
     """Colisiones """
     
     """Jugador con Enemigos"""
     
     if pygame.sprite.spritecollideany(P1, enemies): #verifica si el jugador choco con algun enemigo
-          DISPLAYSURF.fill(RED) #coloca la pantalla en rojo
-          pygame.display.update() #Actualiza la pantalla del juego
-          for entity in all_sprites:
-                entity.kill()  #Elimina todos los elementos
-          time.sleep(2)
-          pygame.quit() # termina el juego
-          sys.exit()
-          
+        print("vidas" ,P1.get_NumeroVidas())
+        if P1.get_NumeroVidas() <= 0: #Si el jugador consumio sus vidas, termina el juego
+            DISPLAYSURF.fill(RED) #coloca la pantalla en rojo
+            del marcador
+            pygame.display.update() #Actualiza la pantalla del juego
+            for entity in all_sprites:
+                  entity.kill()  #Elimina todos los elementos
+            time.sleep(2)
+            pygame.quit() # termina el juego
+            sys.exit()
+        else:   # Si tiene vidas, disminuya y muestra en el marcador
+            P1.disminuir_vidas(1)
+            marcador.modificarMarcador(VIDAS_INCIALES,P1.get_NumeroVidas())
+            
     """Balas con enemigos""" 
     
     # detecta una colision entre la bala y un enemigo, de esta forma se aumenta el puntaje y se eliminan los elementos
@@ -130,10 +137,13 @@ while True:
             enemigo.kill()
             print("hubo un choque")
         bala.kill() # Si la bala choco, elimina la bala
-             
+
+       
+    DISPLAYSURF.blit(marcador.surf,marcador.rect)
+    
     pygame.display.update() # Actualiza la pantalla del juego
     FramePerSec.tick(FPS) # Genera un retardo para poder mostrar FPS cuadros por segundo
-   
+    
     
 pygame.quit()
 sys.exit()

@@ -36,10 +36,10 @@ class Enemy(pygame.sprite.Sprite):
     """
     def __init__(self,size):
         super().__init__() 
-        self.imagen = pygame.image.load("meteoro.png")
+        self.imagen = pygame.image.load("meteoro5.png")
         self.imagen2 = pygame.image.load("misil.png")
         self.imagen3 = pygame.image.load("bomba-nuclear.png")
-        self.randomNumber = random.choice([128,64,32])
+        self.randomNumber = random.choice([70,64,32])
         self.size = (self.randomNumber,self.randomNumber) #Se genera su tamaño como un cuadrado de lado aleatorio
         self.surf = pygame.Surface(self.size)   #Se genera la superficie que aparecera la pantalla
         self.surf.fill(RED)
@@ -48,7 +48,7 @@ class Enemy(pygame.sprite.Sprite):
             self.surf = self.imagen
         elif(self.randomNumber ==64):
             self.surf = self.imagen2
-        elif self.randomNumber ==128 :
+        elif self.randomNumber ==70 :
             self.surf = self.imagen3
         self.speed = 5
         # La siguiente linea me da info de las coordenadas de surf
@@ -63,7 +63,7 @@ class Enemy(pygame.sprite.Sprite):
             #self.rect.top = 0 #vuelve y comienza a bajar desde arriba de la pantalla
             del self.surf #Libera memoria
             del self.rect
-            self.randomNumber = random.choice([128,64,32]) # Su tamaño se asigna nuevamente
+            self.randomNumber = random.choice([70,64,32]) # Su tamaño se asigna nuevamente
             self.size = (self.randomNumber,self.randomNumber)  #Se genera su tamaño como un cuadrado de lado aleatorio
             self.surf = pygame.Surface(self.size) #Se genera la superficie que aparecera la pantalla
             self.surf.fill(RED)
@@ -72,13 +72,14 @@ class Enemy(pygame.sprite.Sprite):
                 self.surf = self.imagen
             elif(self.randomNumber ==64):
                 self.surf = self.imagen2
-            elif self.randomNumber ==128 :
+            elif self.randomNumber ==70 :
                 self.surf = self.imagen3
                 
                 
     def set_speed(self,speed):
         """ Metodo que permite establecer la velocidad del enemigo"""
         self.speed = speed
+        
   
 class Player(pygame.sprite.Sprite):   
     """ Descripcion: 
@@ -96,15 +97,18 @@ class Player(pygame.sprite.Sprite):
     
     """
     
-    def __init__(self):
+    def __init__(self,vidasIniciales=30):
         super().__init__() 
         
         self.surf = pygame.Surface((32, 32))#Se genera la superficie cuadrada que aparecera la pantalla
         self.rect = self.surf.get_rect(center = (SCREEN_WIDTH//2, SCREEN_HEIGHT-100)) #permite asignar las coordenadas del objeto y el centro de estas
         self.surf = pygame.image.load("nave_jugador.png") # Se cambia la superficie plana por una imagen
         self.speed_p = 5 # Se establece la magnitud de la velocidad incial
+        self.vidas = vidasIniciales # Numero inicial de vidas
         
-    def move(self): #Metodo que permite el movimiento del objeto cuando una tecla es presionada
+        
+    def move(self):
+        """Metodo que permite el movimiento del objeto cuando una tecla es presionada"""
         pressed_keys = pygame.key.get_pressed()
         if pressed_keys[K_UP]:
             self.rect.move_ip(0, -self.speed_p)
@@ -124,7 +128,11 @@ class Player(pygame.sprite.Sprite):
     def get_pos(self):
         """Metodo que entrega la posicion del jugador, centrada en la mitad superior del cuerpo de este"""
         return self.rect.midtop
-    
+    def disminuir_vidas(self,cantidad=2):
+        """Metodo que permite disminuir las vidas del jugador"""
+        self.vidas -= cantidad
+    def get_NumeroVidas(self):
+        return self.vidas
 
          
 class Bullet(pygame.sprite.Sprite):
@@ -161,4 +169,21 @@ class Bullet(pygame.sprite.Sprite):
     def set_lanzar(self):
         """funcion que activa el lanzamiento de la bala"""
         self.lanzar = True
+        
+class marcadorVidas:
+    """Clase que se encarga de mostrar el marcador de las vidas de la nave"""
+    
+    def __init__(self,ancho=200,alto=15):
+        self.surf = pygame.Surface((ancho,alto))
+        self.surf.fill(GREEN)
+        self.rect = self.surf.get_rect(center=((ancho/2)+100,50))
+        self.ancho = ancho
+        self.alto = alto
+        self.marcador = 0
+    
+    def modificarMarcador(self,numeroMax,numeroActual):
+        self.marcador = numeroActual*self.ancho/numeroMax
+        self.surf = pygame.Surface((self.marcador,self.alto))
+        self.surf.fill(GREEN)
+        
     

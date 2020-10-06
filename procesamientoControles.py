@@ -33,9 +33,9 @@ def preprocesar_img(imagen):
     #hist_curve_alt(imagenProcesada)
     filtroL = imagenLABColor[:,:,0] < 115 #Filtro para no dejar pasar valores por debajo en L
     imagenProcesada[filtroL] = 0
-    filtroA = imagenLABColor[:,:,1] < 80.4  #Filtro para no dejar pasar valor por debajo en A
+    filtroA = imagenLABColor[:,:,1] < 78.4  #Filtro para no dejar pasar valor por debajo en A
     imagenProcesada[filtroA] = 0
-    filtroB = imagenLABColor[:,:,2] < 170 # Filtro para no dejar pasar valores por debajo en B
+    filtroB = imagenLABColor[:,:,2] < 168 # Filtro para no dejar pasar valores por debajo en B
     imagenProcesada[filtroB] = 0
     
     """Operaciones morfologicas"""
