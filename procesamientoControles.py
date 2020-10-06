@@ -28,27 +28,75 @@ def stackToImg(im1,im2): # Permite concatenar 2 imagenes verticalmente
 def preprocesar_img(imagen):
     """Se encarga de aplicar los filtros adecuados y escojer el espacio de color adecuado para la deteccion del control"""
     imagenProcesada = copy.deepcopy(imagen)
-    imagenLABColor = cv2.cvtColor(imagen,cv2.COLOR_BGR2LAB)
-    #imagenGray3Ch = cv2.merge((imagenGray,imagenGray,imagenGray)) #Permite juntar las 3 capas en una imagen de 3 canales
     #hist_curve_alt(imagenProcesada)
-    filtroL = imagenLABColor[:,:,0] < 115 #Filtro para no dejar pasar valores por debajo en L
-    imagenProcesada[filtroL] = 0
-    filtroA = imagenLABColor[:,:,1] < 78.4  #Filtro para no dejar pasar valor por debajo en A
-    imagenProcesada[filtroA] = 0
-    filtroB = imagenLABColor[:,:,2] < 168 # Filtro para no dejar pasar valores por debajo en B
-    imagenProcesada[filtroB] = 0
+    cero = np.uint8(0)
+    d55 = np.uint8(255)
+    snap_lab = cv2.cvtColor(imagen, cv2.COLOR_BGR2LAB)    # Se cambia de espacio de color de RGB para LAB usando funcion de cv2
+
+    snap_b = snap_lab[:,:,2]                          # Se obtiene componente b de la imagen
+    snap_b= np.where(snap_b<=165,cero,snap_b)  # Se llevan a cero los valores que esten por debajo del filtro
+
+    snap_a = snap_lab[:,:,1]
+    snap_a = np.where(snap_a<=95,cero,snap_a)
+   
+    snap_L = snap_lab[:,:,0]                          # Se obtiene componente b de la imagen
+    snap_L = snap_L.astype(np.float64)                    # Se convierte la imagen entrante en doble para poder operarla
+    snap_Ln = snap_L/np.max(snap_L)             # Se normalizan las intensidades de la imagen
+    snap_Ln = 255 * snap_Ln
+    snap_Ln = snap_Ln.astype('uint8') 
+    snap_L = np.where(snap_Ln<=125,cero,snap_L)
+    
+    snap_lab[snap_a == 0] = 0
+    snap_lab[snap_L == 0] = 0
+    snap_lab[snap_b == 0] = 0
+    
+   
+    imagenProcesada[snap_lab == 0] = 0
+    
     
     """Operaciones morfologicas"""
-    ventanaDeslizante = np.ones((3,3),np.uint8)
-    imagenProcesada = cv2.dilate(imagenProcesada,ventanaDeslizante);
+    #ventanaDeslizante = np.ones((8,8),np.uint8)
+    #imagenProcesada = cv2.morphologyEx(imagenProcesada, cv2.MORPH_OPEN, ventanaDeslizante)  #transformacion open, se realiza primero erosion y luego dilatacion
+
+    #imagenProcesada = cv2.erode(imagenProcesada,ventanaDeslizante);
     #Se eliminina los huecos negros producidos por las letras del marcador
-    imagenProcesada = cv2.morphologyEx(imagenProcesada, cv2.MORPH_OPEN, ventanaDeslizante)  #transformacion open, se realiza primero erosion y luego dilatacion
+    ventanaDeslizante = np.ones((12,12),np.uint8)
+    imagenProcesada = cv2.morphologyEx(imagenProcesada, cv2.MORPH_CLOSE, ventanaDeslizante)  #transformacion open, se realiza primero erosion y luego dilatacion
+    
     #imagenProcesada = cv2.morphologyEx(imagenProcesada, cv2.MORPH_OPEN, ventanaDeslizante)
     #ventanaDeslizante = np.ones((12,12),np.uint8)
     #imagenProcesada = cv2.morphologyEx(imagenProcesada, cv2.MORPH_CLOSE, ventanaDeslizante) 
     
     
     imagen[imagenProcesada == 0] = 0
+    
+    
+    """Center of mass (centroide)"""
+    # convert image to grayscale image
+    gray_image = cv2.cvtColor(imagen, cv2.COLOR_BGR2GRAY)
+    ret,markers = cv2.connectedComponents(gray_image)
+    cmap = plt.cm.get_cmap("jet")
+    area = np.zeros(ret)
+    for i in range(1,ret):
+        area[i] = np.sum(markers==i)
+    mayorArea = np.argmax(area)
+    if mayorArea == 0:
+        mayorArea = 1
+
+    markers = np.where(markers == mayorArea,d55,cero)
+    gray_image[markers == 0] = 0
+    # convert the grayscale image to binary image
+    ret,thresh = cv2.threshold(gray_image,127,255,0)
+    
+    # calculate moments of binary image
+    M = cv2.moments(thresh)
+    
+    # calculate x,y coordinate of center
+    if(M["m00"] != 0) :
+        cX = int(M["m10"] / M["m00"])
+        cY = int(M["m01"] / M["m00"])
+        print((cX,cY))
+    
     
     """ Deteccion de bordes del marcador"""
     # ret,imBW = cv2.threshold(imagenProcesada,100,255,cv2.THRESH_BINARY)
@@ -64,7 +112,7 @@ def preprocesar_img(imagen):
     #imagenesFila = stackToImg(imagen,imBW) #junta 2 imagenes en la misma fila
     
     
-    return imagen
+    return markers
     
     
 def hist_curve_alt(im):
@@ -103,7 +151,7 @@ if __name__ == '__main__':
     if not video: # Si no es posible acceder al programa termine el programa
         sys.exit()
         
-    for i in range(0,100000): # loop de captura
+    for i in range(0,1000): # loop de captura
         imCamara = get_image(video) #llama a la funcion obtener la imagen
         
         imagenesFila = preprocesar_img(imCamara)
