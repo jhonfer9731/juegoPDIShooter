@@ -84,8 +84,16 @@ pygame.time.set_timer(SHOOT,2000)
 while True:
     
     DISPLAYSURF.blit(img_background,(0,0)) # Dibuja la imagen de fondo del juego
-    loopImagen()
+    ubicacionControl = loopImagen()
+    if ubicacionControl == 1: #izquierda
+        P1.set_speed(-5)
+    elif ubicacionControl == 2: #Derecha
+        P1.set_speed(5)
+    else:
+        P1.set_speed(0)
+    # elif ubicacionControl == 4 : #abajo
     
+    # elif ubicacionControl == 3 : #arriba
     """Observador de Eventos"""
     
     for event in pygame.event.get(): #En cada ciclo, se verifica si se dispararon algunos eventos
@@ -115,11 +123,13 @@ while True:
                 bullets_group.add(bullet)
                 all_sprites.add(bullet)
                 
-    #Mueve y re dibuja todos los objetos del juego
+    """Mueve y re dibuja todos los objetos del juego"""
+    
     for entity in all_sprites:
         DISPLAYSURF.blit(entity.surf, entity.rect) # dibujar en la superficie el objeto (entity.surf) con las coordenadas dadas por entity,.rect
         entity.move() # Mueve los elementos del juego
-    DISPLAYSURF.blit
+    
+    
     """Colisiones """
     
     """Jugador con Enemigos"""

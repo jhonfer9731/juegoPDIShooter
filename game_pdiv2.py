@@ -101,6 +101,7 @@ def loopImagen():
     here = masks(cbd)
     if here != 0:
         print (here)
+    return here
     
 
    

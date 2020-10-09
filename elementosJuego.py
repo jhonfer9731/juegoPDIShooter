@@ -110,17 +110,18 @@ class Player(pygame.sprite.Sprite):
         
     def move(self):
         """Metodo que permite el movimiento del objeto cuando una tecla es presionada"""
-        pressed_keys = pygame.key.get_pressed()
-        if pressed_keys[K_UP]:
-            self.rect.move_ip(0, -self.speed_p)
-        if pressed_keys[K_DOWN]:
-            self.rect.move_ip(0,self.speed_p)
-        if self.rect.left > 0: # Permite moverse a izq o der solo cuando el jugador este dentro del recuadro de la pantalla
-              if pressed_keys[K_LEFT]:
-                  self.rect.move_ip(-self.speed_p, 0)
-        if self.rect.right < SCREEN_WIDTH:        
-              if pressed_keys[K_RIGHT]:
-                  self.rect.move_ip(self.speed_p, 0) 
+        # pressed_keys = pygame.key.get_pressed()
+        # if pressed_keys[K_UP]:
+        #     self.rect.move_ip(0, -self.speed_p)
+        # if pressed_keys[K_DOWN]:
+        #     self.rect.move_ip(0,self.speed_p)
+        # if self.rect.left > 0: # Permite moverse a izq o der solo cuando el jugador este dentro del recuadro de la pantalla
+        #       if pressed_keys[K_LEFT]:
+        #           self.rect.move_ip(-self.speed_p, 0)
+        # if self.rect.right < SCREEN_WIDTH:        
+        #       if pressed_keys[K_RIGHT]:
+        #           self.rect.move_ip(self.speed_p, 0) 
+        self.rect.move_ip(self.speed_p,0)
                          
     def set_speed(self,speed):
         """Metodo que permite cambiar la magnitud velocidad del jugador"""
