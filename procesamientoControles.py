@@ -146,8 +146,8 @@ if __name__ == '__main__':
     
     camara = 0
     video = cv2.VideoCapture(camara) #Instancia el objeto que permite capturar video de la camara del pc
-    video.set(cv2.CAP_PROP_FRAME_WIDTH,1280) #Permite configurar el tamaño del video, en este caso HD
-    video.set(cv2.CAP_PROP_FRAME_HEIGHT,720)
+    #video.set(cv2.CAP_PROP_FRAME_WIDTH,1280) #Permite configurar el tamaño del video, en este caso HD
+    #video.set(cv2.CAP_PROP_FRAME_HEIGHT,720)
     if not video: # Si no es posible acceder al programa termine el programa
         sys.exit()
         

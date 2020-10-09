@@ -6,9 +6,17 @@ Created on Sat Sep 26 17:04:54 2020
 """
 #Imports
 
-
+from cv2 import *
+import numpy as np
 from elementosJuego import *
+import game_pdiv2
 
+
+
+camara = 0   #Defecto es 0
+video = cv2.VideoCapture(camara) #Se inicia la captura de video
+if not video:
+    sys.exit(1)
 #Inicializacion del juego
 pygame.init()
  
@@ -75,7 +83,7 @@ pygame.time.set_timer(SHOOT,2000)
 while True:
     
     DISPLAYSURF.blit(img_background,(0,0)) # Dibuja la imagen de fondo del juego
-    
+    loopImagen()
     
     """Observador de Eventos"""
     
@@ -95,6 +103,7 @@ while True:
         if event.type == QUIT:#Evento disparado al cerrar la ventana del juego
             for entity in all_sprites:
                 entity.kill() #Elimina todos los obejetos del juego y libera memoria
+            cerrarVideo()
             pygame.quit() # Sale del juego
             sys.exit()
             
@@ -123,6 +132,7 @@ while True:
             for entity in all_sprites:
                   entity.kill()  #Elimina todos los elementos
             time.sleep(2)
+            cerrarVideo()
             pygame.quit() # termina el juego
             sys.exit()
         else:   # Si tiene vidas, disminuya y muestra en el marcador
