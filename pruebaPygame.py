@@ -9,12 +9,13 @@ Created on Sat Sep 26 17:04:54 2020
 from cv2 import *
 import numpy as np
 from elementosJuego import *
-import game_pdiv2
+from game_pdiv2 import *
 
 
 
-camara = 0   #Defecto es 0
-video = cv2.VideoCapture(camara) #Se inicia la captura de video
+
+
+
 if not video:
     sys.exit(1)
 #Inicializacion del juego

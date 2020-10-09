@@ -17,6 +17,9 @@ import numpy as np
 import time
 import sys
 
+camara = 0   #Defecto es 0
+video = cv2.VideoCapture(camara) #Se inicia la captura de video
+
 
 def get_image():
      # leer la captura

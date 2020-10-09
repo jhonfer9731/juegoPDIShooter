@@ -17,6 +17,10 @@ import numpy as np
 import time
 import sys
 
+camara = 0   #Defecto es 0
+video = cv2.VideoCapture(camara) #Se inicia la captura de video
+
+
 def get_image():
      # leer la captura
      retval, im = video.read()#Se inica la lectura del video
@@ -88,27 +92,19 @@ def masks(im):
 
 
 
+def loopImagen():
+    img = get_image()#Se obtiene un frame del video    OJOOOOOOOOOO
+    cb = componente_lab(img)
+    cbd = openf(cb)
+    #cv2.imshow("camara", img)#Se muestra la imagen capturada
+    cv2.imshow("camara_bn", cbd)#Se muestra la componente b normalizada de LAB de la imagen capturada
+    here = masks(cbd)
+    if here != 0:
+        print (here)
+    
 
-if __name__=='__main__':
-    camara = 0   #Defecto es 0
-    video = cv2.VideoCapture(camara) #Se inicia la captura de video
-    if not video:
-        sys.exit(1)
-     
-    while True: 
-        img = get_image()#Se obtiene un frame del video    OJOOOOOOOOOO
-        if img is None:
-            break
-        cb = componente_lab(img)
-        cbd = openf(cb)
-        #cv2.imshow("camara", img)#Se muestra la imagen capturada
-        cv2.imshow("camara_bn", cbd)#Se muestra la componente b normalizada de LAB de la imagen capturada
-        here = masks(cbd)
-        if here != 0:
-            print (here)
-        
-        if cv2.waitKey(10) == 27:#Espera por 'ESC'
-            break
+   
+def cerrarVideo():
     video.release()#Se cierra la camara
     cv2.destroyAllWindows()
 
