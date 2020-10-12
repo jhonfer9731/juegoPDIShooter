@@ -32,70 +32,69 @@ def preprocesar_img(imagen):
     cero = np.uint8(0)
     d55 = np.uint8(255)
     snap_lab = cv2.cvtColor(imagen, cv2.COLOR_BGR2LAB)    # Se cambia de espacio de color de RGB para LAB usando funcion de cv2
-
     snap_b = snap_lab[:,:,2]                          # Se obtiene componente b de la imagen
     snap_b= np.where(snap_b<=165,cero,snap_b)  # Se llevan a cero los valores que esten por debajo del filtro
-
-    snap_a = snap_lab[:,:,1]
-    snap_a = np.where(snap_a<=95,cero,snap_a)
+    #snap_b has dimension 2
+    #snap_a = snap_lab[:,:,1]
+    #snap_a = np.where(snap_a<=10,cero,snap_a)
    
-    snap_L = snap_lab[:,:,0]                          # Se obtiene componente b de la imagen
+    snap_L = snap_lab[:,:,0]                          # Se obtiene componente L de la imagen
     snap_L = snap_L.astype(np.float64)                    # Se convierte la imagen entrante en doble para poder operarla
     snap_Ln = snap_L/np.max(snap_L)             # Se normalizan las intensidades de la imagen
     snap_Ln = 255 * snap_Ln
-    snap_Ln = snap_Ln.astype('uint8') 
-    snap_L = np.where(snap_Ln<=125,cero,snap_L)
+    snap_Ln = snap_Ln.astype('uint8')
+    snap_L = np.where(snap_L<=50,cero,snap_L)
     
-    snap_lab[snap_a == 0] = 0
+    #esnap_lab[snap_a == 0] = 0
     snap_lab[snap_L == 0] = 0
     snap_lab[snap_b == 0] = 0
+    mascarasnap = np.logical_and(snap_L,snap_b)
     
-   
-    imagenProcesada[snap_lab == 0] = 0
+    imagenProcesada[mascarasnap == False] = 0
     
     
     """Operaciones morfologicas"""
-    #ventanaDeslizante = np.ones((8,8),np.uint8)
-    #imagenProcesada = cv2.morphologyEx(imagenProcesada, cv2.MORPH_OPEN, ventanaDeslizante)  #transformacion open, se realiza primero erosion y luego dilatacion
+    ventanaDeslizante = np.ones((10,10),np.uint8)
+    imagenProcesada = cv2.morphologyEx(imagenProcesada, cv2.MORPH_OPEN, ventanaDeslizante)  #transformacion open, se realiza primero erosion y luego dilatacion
 
     #imagenProcesada = cv2.erode(imagenProcesada,ventanaDeslizante);
     #Se eliminina los huecos negros producidos por las letras del marcador
-    ventanaDeslizante = np.ones((12,12),np.uint8)
-    imagenProcesada = cv2.morphologyEx(imagenProcesada, cv2.MORPH_CLOSE, ventanaDeslizante)  #transformacion open, se realiza primero erosion y luego dilatacion
+    # ventanaDeslizante = np.ones((5,5),np.uint8)
+    # imagenProcesada = cv2.morphologyEx(imagenProcesada, cv2.MORPH_CLOSE, ventanaDeslizante)  #transformacion open, se realiza primero erosion y luego dilatacion
     
     #imagenProcesada = cv2.morphologyEx(imagenProcesada, cv2.MORPH_OPEN, ventanaDeslizante)
     #ventanaDeslizante = np.ones((12,12),np.uint8)
     #imagenProcesada = cv2.morphologyEx(imagenProcesada, cv2.MORPH_CLOSE, ventanaDeslizante) 
     
     
-    imagen[imagenProcesada == 0] = 0
+    #imagen[imagenProcesada == 0] = 0
     
     
     """Center of mass (centroide)"""
     # convert image to grayscale image
-    gray_image = cv2.cvtColor(imagen, cv2.COLOR_BGR2GRAY)
-    ret,markers = cv2.connectedComponents(gray_image)
-    cmap = plt.cm.get_cmap("jet")
-    area = np.zeros(ret)
-    for i in range(1,ret):
-        area[i] = np.sum(markers==i)
-    mayorArea = np.argmax(area)
-    if mayorArea == 0:
-        mayorArea = 1
+    # gray_image = cv2.cvtColor(imagen, cv2.COLOR_BGR2GRAY)
+    # ret,markers = cv2.connectedComponents(gray_image)
+    # cmap = plt.cm.get_cmap("jet")
+    # area = np.zeros(ret)
+    # for i in range(1,ret):
+    #     area[i] = np.sum(markers==i)
+    # mayorArea = np.argmax(area)
+    # if mayorArea == 0:
+    #     mayorArea = 1
 
-    markers = np.where(markers == mayorArea,d55,cero)
-    gray_image[markers == 0] = 0
+    # markers = np.where(markers == mayorArea,d55,cero)
+    # gray_image[markers == 0] = 0
     # convert the grayscale image to binary image
-    ret,thresh = cv2.threshold(gray_image,127,255,0)
+    # ret,thresh = cv2.threshold(gray_image,127,255,0)
     
     # calculate moments of binary image
-    M = cv2.moments(thresh)
+    # qq
     
     # calculate x,y coordinate of center
-    if(M["m00"] != 0) :
-        cX = int(M["m10"] / M["m00"])
-        cY = int(M["m01"] / M["m00"])
-        print((cX,cY))
+    # if(M["m00"] != 0) :
+    #     cX = int(M["m10"] / M["m00"])
+    #     cY = int(M["m01"] / M["m00"])
+    #     print((cX,cY))
     
     
     """ Deteccion de bordes del marcador"""
@@ -112,7 +111,7 @@ def preprocesar_img(imagen):
     #imagenesFila = stackToImg(imagen,imBW) #junta 2 imagenes en la misma fila
     
     
-    return markers
+    return imagenProcesada
     
     
 def hist_curve_alt(im):

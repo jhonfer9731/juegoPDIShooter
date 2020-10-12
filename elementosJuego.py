@@ -36,6 +36,7 @@ class Enemy(pygame.sprite.Sprite):
     
     """
     def __init__(self,size):
+        
         super().__init__() 
         self.imagen = pygame.image.load("meteoro5.png")
         self.imagen2 = pygame.image.load("misil.png")
@@ -106,6 +107,8 @@ class Player(pygame.sprite.Sprite):
         self.surf = pygame.image.load("nave_jugador.png") # Se cambia la superficie plana por una imagen
         self.speed_p = 5 # Se establece la magnitud de la velocidad incial
         self.vidas = vidasIniciales # Numero inicial de vidas
+        self.municiones = 15
+        self.puntaje = 0
         
         
     def move(self):
@@ -120,7 +123,13 @@ class Player(pygame.sprite.Sprite):
         #           self.rect.move_ip(-self.speed_p, 0)
         # if self.rect.right < SCREEN_WIDTH:        
         #       if pressed_keys[K_RIGHT]:
-        #           self.rect.move_ip(self.speed_p, 0) 
+        #           self.rect.move_ip(self.speed_p, 0)
+        if self.rect.right >= SCREEN_WIDTH:
+            self.rect.right = SCREEN_WIDTH
+        elif self.rect.left <= 0:
+            self.rect.left = 0
+        #elif self.rect.right < SCREEN_WIDTH and self.rect.left: 
+            
         self.rect.move_ip(self.speed_p,0)
                          
     def set_speed(self,speed):
@@ -135,6 +144,16 @@ class Player(pygame.sprite.Sprite):
         self.vidas -= cantidad
     def get_NumeroVidas(self):
         return self.vidas
+    def get_numMuniciones(self):
+        return self.municiones
+    def disminuirMuniciones(self):
+        self.municiones -=1
+    def set_Municiones(self,numeroBalas):
+        self.municiones = numeroBalas
+    def incrementarPuntaje (self,puntaje):
+        self.puntaje += puntaje
+    def get_puntaje(self):
+        return self.puntaje
 
          
 class Bullet(pygame.sprite.Sprite):
@@ -187,5 +206,16 @@ class marcadorVidas:
         self.marcador = numeroActual*self.ancho/numeroMax
         self.surf = pygame.Surface((self.marcador,self.alto))
         self.surf.fill(GREEN)
+        
+class MarcadorMunicion(marcadorVidas):
+    
+    def __init__(self,ancho=200,alto=15):
+        super().__init__()
+        self.rect = self.surf.get_rect(center=((ancho/2)+100,100))
+    
+    def modificarMarcador(self,numeroMax,numeroActual):
+        self.marcador = numeroActual*self.ancho/numeroMax
+        self.surf = pygame.Surface((self.marcador,self.alto))
+        self.surf.fill(BLUE )
         
     
