@@ -20,6 +20,8 @@ import sys
 camara = 0   #Defecto es 0
 video = cv2.VideoCapture(camara) #Se inicia la captura de video
 coordenadasCentroide = [0,0]
+cX = 0
+cY = 0
 
 def get_image():
      # leer la captura
@@ -40,16 +42,16 @@ def componente_lab(snap):
     snap_lab = cvtColor(snap, COLOR_BGR2LAB)    # Se cambia de espacio de color de RGB para LAB usando funcion de cv2
     snap_b = snap_lab[:,:,2] 
     snap_a = snap_lab[:,:,1]                         # Se obtiene componente b de la imagen
-    snap_bn = np.where(snap_b>170,d55,cero)
-    snap_bn[snap_a > 157] = 0 # filtro en a para que la imagen no se contamine en condicion nocturna
+    snap_bn = np.where(snap_b>155,d55,cero)
+    snap_bn[snap_a > 210] = 0 # filtro en a para que la imagen no se contamine en condicion nocturna
     
     return snap_bn
 
 def openf(compo):
     
     ee = np.ones((2,2),np.uint8)    #Elemento estructurante
-    #transformacion open, se realiza primero erosion y luego dilatacion
-    imagenProcesada = cv2.morphologyEx(compo, cv2.MORPH_OPEN, ee,iterations=6)  
+    #transformacion open, se realiza primero erosion y luego dilatacion para eliminar ruido del en el entorno del objeto
+    imagenProcesada = cv2.morphologyEx(compo, cv2.MORPH_OPEN, ee,iterations=5)  
     imagenProcesada = cv2.dilate(compo,ee,iterations = 3)
     # Ciclo para la erosion
     # for i in range(1, 30):
@@ -66,8 +68,8 @@ def masks(im,screenSize):
     total = im.shape[0] * im.shape[1] # numero de pixeles de la imagen original de un canal
     count = cv2.countNonZero(im)# numero de pixeles del objeto en la imagen original
     
-    if count < 13000:
-        return (0,0)
+    if count < 11000:  #Comprueba que el objeto sea visible, estableciendo un limite inferior para el area para los controles
+        return (0,0,im)
     #solo toca la parte izquierda de la pantalla para indicar izquierda o derecha
     
     """Definición de las regiones de decision para el movimiento de la nave"""
@@ -79,10 +81,36 @@ def masks(im,screenSize):
     total_mr = mr.shape[0] * mr.shape[1]#dimension total de la region de decision para mov a derecha
     count_mr = cv2.countNonZero(mr)# Area total ocupada por el objeto dentro de la region de decision
     
+    """Binarizacion de la imagen"""
+    
+    ret,thresh = cv2.threshold(im,127,255,0) #Se binariza la imagen para obtener los momentos con el fin de hallar el centroide
+    
+    """Calculo del contorno de la mano del jugador"""
+    
+    puntosContorno = encontrarContornos(thresh)
+    areaContorno = cv2.contourArea(puntosContorno)
+    imConContorno = cv2.drawContours(cv2.merge([im,im,im]), [puntosContorno], -1, (0,255,100), 3)
+    
+    
+    hull = cv2.convexHull(puntosContorno) # Encuentra los Convexity deflects, cuyo contorno une los puntos ubicados en las esquinas del contorno en este caso los dedos
+    imConContorno = cv2.drawContours(imConContorno, [hull], -1, (0,0,255), 3) # dibuja el contorno encontrado por convexHull
+    areaConvexHull = cv2.contourArea(hull)
+    
+    """Calculo del area entre los dedos de la mano (espacios de deflexion de la concavidad) """
+    
+    areaEntreDedos = areaConvexHull-areaContorno
+    
+    if areaConvexHull != 0: 
+        porcAreaEntreDedos = areaEntreDedos*100/areaConvexHull
+    else:
+        porcAreaEntreDedos = 0
+        
+        
+    print("porAreaEntreDedos:  " , porcAreaEntreDedos)
     
     """Calulo del centroide de la imagen """
-    ret,thresh = cv2.threshold(im,127,255,0) #Se binariza la imagen para obtener los momentos con el fin de hallar el centroide
-    M = cv2.moments(thresh) # this function find the moments of the image, it returns a dictionary with the different moments calculated ¿
+    
+    M = cv2.moments(puntosContorno) # this function find the moments of the image, it returns a dictionary with the different moments calculated ¿
     
     if(M["m00"] != 0) :
         cX = int(M["m10"] / M["m00"])
@@ -91,7 +119,10 @@ def masks(im,screenSize):
     coordenadasCentroide[0] = cX
     coordenadasCentroide[1] = cY
     
-    #print("area para bala:",(count/total)*100 )
+    print("Coordenadas Centroide: ",(cX,cY))
+
+    
+    
 
     """ Condiciones que permiten activar el movimiento a derecha e izquierda al igual que el disparo"""
     
@@ -109,13 +140,24 @@ def masks(im,screenSize):
         maskMov = 0 #Si el porcentaje de area ocupada del objeto no es el suficiente no se mueve
         
     porcentajeAreaObj = (count/total)*100 #se verifica el porcentaje de area ocupada por el objeto respecto a la pantalla original
-    if porcentajeAreaObj >= 3 and porcentajeAreaObj <=8: #Cuando hace puño con la mano, el porcentaje de area disminuye, se verifica que este en el rango
+    """ Condicion para disparo, se el area entre los dedos de la mano es menor que 7000, significa que los dedos se contraen en forma de puño"""
+    if porcentajeAreaObj >= 3 and porcentajeAreaObj <=10 and porcAreaEntreDedos <17: #Cuando hace puño con la mano, el porcentaje de area disminuye pero no es 0, se verifica que este en el rango
         maskDisparo = 3     #dispara
     else:
         maskDisparo = 0     #no dispara
     
-    return (maskMov,maskDisparo)
+    return (maskMov,maskDisparo,imConContorno)
 
+
+def encontrarContornos(imagenBW):
+    """Funcion que encuentra el contorno de la mano para el manejo de los controles del juego"""
+    contornos,hierarchy = cv2.findContours(imagenBW,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+    areas = np.array([cv2.contourArea(i) for i in contornos])
+    indiceMaxContour = np.argmax(areas) # El contorno con el area maxima se toma como el de la mano
+    
+    # print("numero de puntos de contorno: ",np.shape(contornos[indiceMaxContour]))
+    return contornos[indiceMaxContour]
+    
 
 
 
@@ -127,9 +169,11 @@ def loopImagen():
     cb = componente_lab(img)
     cbd = openf(cb)
     #cv2.imshow("camara", img)#Se muestra la imagen capturada
-    cv2.imshow("camara_bn", cbd)#Se muestra la componente b normalizada de LAB de la imagen capturada
+    (controlMov,controlDisp,imagenContornos) = masks(cbd,screenSize=(WIDTH,HEIGHT))
     
-    controlMov,controlDisp = masks(cbd,screenSize=(WIDTH,HEIGHT))
+    cv2.imshow("camara_bn", imagenContornos)#Se muestra la imagen prepocesada y segmentada en el espacio LAB junto con sus contornos
+    
+    
     return (controlMov,controlDisp)
 
    

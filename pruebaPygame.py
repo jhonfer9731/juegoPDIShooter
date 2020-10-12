@@ -97,6 +97,7 @@ pygame.time.set_timer(SHOOT,2000)
 """Timer balas"""
 
 banderaRecarga = True
+tiempoDespuesDisparo = 0
 
 """Loop principal del juego """
 
