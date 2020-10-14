@@ -1,9 +1,20 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Oct  5 20:04:00 2020
-
-@author: user
-"""
+"""---------------------------------------------------------------------------
+------------------------------------------------------------------------------
+-------------------PROCESAMIENTO DIGITAL DE IMAGENES--------------------------
+--------------------ELEMENTOS Y CLASES DEL JUEGO------------------------------
+------------------------------------------------------------------------------
+------------------------------------------------------------------------------
+----Por: CHRISTIAN CAMILO GARZÓN VÁSQUEZ y JHON FERNANDO BENAVIDES BASTIDAS---
+----CC: ---------- 1037637207 ------------------- 1087618855 -----------------
+------------------------------------------------------------------------------
+------------------------------------------------------------------------------
+------------------------------------------------------------------------------
+------------------------UNIVERSIDAD DE ANTIOQUIA -----------------------------
+-------------------------FACULTAD DE INGENIERIA-------------------------------
+-----------------INGENIERIA ELECTRONICA Y DE TELECOMUNICACIONES---------------
+-------------------------------2020-1-----------------------------------------
+---------------------------------------------------------------------------"""
 
 import pygame, sys
 from pygame.locals import *
@@ -62,7 +73,6 @@ class Enemy(pygame.sprite.Sprite):
         self.rect.move_ip(0,self.speed) # Funcion para mover el enemigo especificando la velocidad xy
       
         if (self.rect.top > SCREEN_HEIGHT): # Condicion cuando llega a la parte inferior y no colisiono con el jugador
-            #self.rect.top = 0 #vuelve y comienza a bajar desde arriba de la pantalla
             del self.surf #Libera memoria
             del self.rect
             self.randomNumber = random.choice([70,64,32]) # Su tamaño se asigna nuevamente
@@ -113,17 +123,7 @@ class Player(pygame.sprite.Sprite):
         
     def move(self):
         """Metodo que permite el movimiento del objeto cuando una tecla es presionada"""
-        # pressed_keys = pygame.key.get_pressed()
-        # if pressed_keys[K_UP]:
-        #     self.rect.move_ip(0, -self.speed_p)
-        # if pressed_keys[K_DOWN]:
-        #     self.rect.move_ip(0,self.speed_p)
-        # if self.rect.left > 0: # Permite moverse a izq o der solo cuando el jugador este dentro del recuadro de la pantalla
-        #       if pressed_keys[K_LEFT]:
-        #           self.rect.move_ip(-self.speed_p, 0)
-        # if self.rect.right < SCREEN_WIDTH:        
-        #       if pressed_keys[K_RIGHT]:
-        #           self.rect.move_ip(self.speed_p, 0)
+
         if self.rect.right >= SCREEN_WIDTH:
             self.rect.right = SCREEN_WIDTH
         elif self.rect.left <= 0:

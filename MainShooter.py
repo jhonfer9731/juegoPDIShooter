@@ -1,15 +1,26 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Sat Sep 26 17:04:54 2020
+"""---------------------------------------------------------------------------
+------------------------------------------------------------------------------
+-------------------PROCESAMIENTO DIGITAL DE IMAGENES--------------------------
+---------------------FUNCION PRINCIPAL QUE INVOCA OTRAS FUNCIONES-------------
+------------------------------------------------------------------------------
+------------------------------------------------------------------------------
+----Por: CHRISTIAN CAMILO GARZÓN VÁSQUEZ y JHON FERNANDO BENAVIDES BASTIDAS---
+----CC: ---------- 1037637207 ------------------- 1087618855 -----------------
+------------------------------------------------------------------------------
+------------------------------------------------------------------------------
+------------------------------------------------------------------------------
+------------------------UNIVERSIDAD DE ANTIOQUIA -----------------------------
+-------------------------FACULTAD DE INGENIERIA-------------------------------
+-----------------INGENIERIA ELECTRONICA Y DE TELECOMUNICACIONES---------------
+-------------------------------2020-1-----------------------------------------
+---------------------------------------------------------------------------"""
 
-@author: Christian Camilo Garzon, Jhon Fernando benavides
-"""
 #Imports
-
-from cv2 import *
+from cv2 import *   #!!!PDI!!!
 import numpy as np
-from elementosJuego import *
-from game_pdiv2 import *
+from elementosJuego import * 
+from func_pdi import * #!!!PDI!!!
 
 
 if not video:
@@ -112,7 +123,7 @@ while True:
         pygame.time.set_timer(RECARGA_BALAS,4000) # Dispara el evento para realizar la recarga de las balas despues de 4 segundos   
         banderaRecarga = False
         
-    ubicacionControl,balaControl = loopImagen()
+    ubicacionControl,balaControl = loopImagen() #!!!PDI!!!
     # print(ubicacionControl)
     
     if ubicacionControl == 1: #izquierda
